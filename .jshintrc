@@ -1,0 +1,24 @@
+{
+  "node": true,
+  "globals": {
+    "describe": false,
+    "it": false,
+    "before": false,
+    "beforeEach": false,
+    "after": false,
+    "afterEach": false
+  },
+  "camelcase": false,
+  "eqeqeq": true,
+  "eqnull": true,
+  "indent": 2,
+  "latedef": true,
+  "newcap": true,
+  "quotmark": "single",
+  "trailing": true,
+  "undef": true,
+  "unused": true,
+  "maxlen": 120,
+  "strict": true,
+  "expr": true
+}
