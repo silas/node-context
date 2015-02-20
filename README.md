@@ -13,8 +13,8 @@ Initialize a new context.
 
 Options
 
- * deadline (Date, optional): time when request expires
- * timeout (Integer, optional): duration in milliseconds until request expires
+ * deadline (Number, optional): time when request expires (milliseconds since Unix epoch)
+ * timeout (Number, optional): duration in milliseconds until request expires
  * parent (Context, optional): parent context, inherits deadlines and cancelation signals
 
 <a name="context-event-done"/>
@@ -37,6 +37,11 @@ This is safe to call multiple times.
 Create and return a child context.
 
 This accepts the same options as the context constructor and automatically sets the `parent` option.
+
+<a name="context-deadline"/>
+### context.deadline
+
+Number of milliseconds since Unix epoch.
 
 ## License
 
