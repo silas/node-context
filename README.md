@@ -25,21 +25,21 @@ Emitted when the request exceeds it's deadline or is canceled.
 This is only emitted once.
 
 <a name="context-cancel"/>
-### context.cancel()
+### ctx.cancel()
 
 Cancel request immediately.
 
 This is safe to call multiple times.
 
 <a name="context-create"/>
-### context.create([options])
+### ctx.create([options])
 
 Create and return a child context.
 
 This accepts the same options as the context constructor and automatically sets the `parent` option.
 
 <a name="context-deadline"/>
-### context.deadline
+### ctx.deadline
 
 Number of milliseconds since Unix epoch.
 
