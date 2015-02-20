@@ -28,13 +28,13 @@ describe('Context', function() {
       var ctx = new context.Context();
 
       ctx.should.have.property('done', false);
-      ctx.should.not.have.property('__timeout');
+      ctx.should.not.have.property('__timeoutId');
     });
 
-    it('should call timeout if deadline specified', function(done) {
+    it('should call timeout if deadline specified @test', function(done) {
       var deadline = 1000;
 
-      this.sinon.stub(context.Context.prototype, '_timeout', function() {
+      this.sinon.stub(context.Context.prototype, '__timeout', function() {
         this.should.have.property('deadline', deadline);
 
         done();
@@ -46,7 +46,7 @@ describe('Context', function() {
     it('should call timeout if timeout specified', function(done) {
       var timeout = 1000;
 
-      this.sinon.stub(context.Context.prototype, '_timeout', function(now) {
+      this.sinon.stub(context.Context.prototype, '__timeout', function(now) {
         this.should.have.property('deadline', now + timeout);
 
         done();
@@ -116,9 +116,9 @@ describe('Context', function() {
     });
 
     it('should emit done immediately if in the past', function(done) {
-      var cancel = context.Context.prototype.cancel;
+      var cancel = context.Context.prototype.__cancel;
 
-      var stub = this.sinon.stub(context.Context.prototype, 'cancel', function() {
+      var stub = this.sinon.stub(context.Context.prototype, '__cancel', function() {
         return cancel.apply(this, arguments);
       });
 
@@ -134,7 +134,7 @@ describe('Context', function() {
 
   describe('create', function() {
     it('should use parent deadline if not defined', function() {
-      this.sinon.spy(context.Context.prototype, '_timeout');
+      this.sinon.spy(context.Context.prototype, '__timeout');
 
       var deadline = 1000;
       var parent = context({ deadline: deadline });
@@ -144,7 +144,7 @@ describe('Context', function() {
     });
 
     it('should use parent deadline if less', function() {
-      this.sinon.spy(context.Context.prototype, '_timeout');
+      this.sinon.spy(context.Context.prototype, '__timeout');
 
       var deadline = 1000;
       var parent = context({ deadline: deadline });
@@ -154,7 +154,7 @@ describe('Context', function() {
     });
 
     it('should use child deadline if less', function() {
-      this.sinon.spy(context.Context.prototype, '_timeout');
+      this.sinon.spy(context.Context.prototype, '__timeout');
 
       var deadline = 1000;
       var parent = context({ deadline: 2000 });
