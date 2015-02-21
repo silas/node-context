@@ -31,7 +31,7 @@ describe('Context', function() {
       ctx.should.not.have.property('__timeoutId');
     });
 
-    it('should call timeout if deadline specified @test', function(done) {
+    it('should call timeout if deadline specified', function(done) {
       var deadline = 1000;
 
       this.sinon.stub(context.Context.prototype, '__timeout', function() {
@@ -133,6 +133,16 @@ describe('Context', function() {
   });
 
   describe('create', function() {
+    it('should copy parent properties', function() {
+      var parent = context();
+      parent.ok = true;
+      parent._fail = true;
+      var child = parent.create();
+
+      child.should.have.property('ok', true);
+      child.should.not.have.property('_fail');
+    });
+
     it('should use parent deadline if not defined', function() {
       this.sinon.spy(context.Context.prototype, '__timeout');
 
