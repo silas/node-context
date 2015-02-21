@@ -6,6 +6,8 @@
 
 require('should');
 
+var events = require('events');
+
 var utils = require('../lib/utils');
 
 /**
@@ -26,25 +28,17 @@ describe('utils', function() {
     });
 
     it('should omit hidden and excluded properties', function() {
-      var Test = function() {
-        this.hello1 = 'world1';
-        this._one = 'one';
-        this.__two = 'two';
-        this.domain = {};
-        this.deadline = 123;
-      };
-      Test.prototype.create = function() {
-        this.hello2 = 'world2';
-      };
-      var src = new Test();
-      src.create();
+      var src = new events.EventEmitter();
+      src.hello = 'world';
+      src._one = 'one';
+      src.__two = 'two';
+      if (!src.domain) src.domain = {};
+      src.deadline = 123;
       var dst = {};
 
       utils.copyEvent(src, dst);
 
-      dst.should.have.keys('hello1', 'hello2');
-      dst.should.have.property('hello1', 'world1');
-      dst.should.have.property('hello2', 'world2');
+      dst.should.have.keys('hello');
     });
   });
 });
