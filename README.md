@@ -61,9 +61,9 @@ This is only emitted once.
 <a name="context-cancel"/>
 ### ctx.cancel()
 
-Cancel request immediately.
+Cancel/finish request immediately.
 
-This is safe to call multiple times.
+This should always be called when the request is finished and is safe to call multiple times.
 
 <a name="context-create"/>
 ### ctx.create([options])
