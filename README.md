@@ -9,33 +9,41 @@ Influenced by Go's [context](https://golang.org/x/net/context).
 ``` javascript
 var context = require('node-context');
 
-function work(ctx, name) {
+function display(ctx, name) {
+  ctx.once('cancel', function() {
+    console.log('%s cancel %d (deadline %d)', name, new Date() - ctx.time, ctx.deadline);
+  });
+
   ctx.once('done', function() {
-    console.log(name + ' done %d (deadline %d)', new Date() - ctx.time, ctx.deadline);
+    console.log('%s done', name);
   });
 }
 
-function main() {
-  var ctx = context({ timeout: 1000 });
-  ctx.time = new Date();
+var main = context();
+main.time = new Date();
 
-  ctx.once('done', function() {
-    console.log('main done %d (deadline %d)', new Date() - ctx.time, ctx.deadline);
-  });
+var master = main.create({ timeout: 1000 });
 
-  work(ctx.create({ timeout: 500 }), 'work1');
-  work(ctx.create(), 'work2');
-}
+display(main, 'main');
+display(master, 'master');
+display(master.create({ timeout: 500 }), 'worker1');
+display(master.create(), 'worker2');
 
-main();
+process.on('beforeExit', function() {
+  main.done();
+});
 ```
 
 Output
 
 ```
-work1 done 524 (deadline 1424550908411)
-main done 1002 (deadline 1424550908908)
-work2 done 1005 (deadline 1424550908908)
+worker1 cancel 532 (deadline 1425278555679)
+worker1 done
+master cancel 1009 (deadline 1425278556175)
+worker2 cancel 1010 (deadline 1425278556175)
+worker2 done
+master done
+main done
 ```
 
 ## Documentation
@@ -51,19 +59,19 @@ Options
  * timeout (Number, optional): duration in milliseconds until request expires
  * parent (Context, optional): parent context; inherits deadlines, cancelation signals, and properties
 
-<a name="context-event-done"/>
-### Event: 'done'
+<a name="context-event-cancel"/>
+### Event: 'cancel'
 
 Emitted when the request exceeds it's deadline or is canceled.
 
 This is only emitted once.
 
-<a name="context-cancel"/>
-### ctx.cancel()
+<a name="context-event-done"/>
+### Event: 'done'
 
-Cancel/finish request immediately.
+Emitted when the request is done.
 
-This should always be called when the request is finished and is safe to call multiple times.
+This is only emitted once.
 
 <a name="context-create"/>
 ### ctx.create([options])
@@ -72,10 +80,24 @@ Create and return a child context.
 
 This accepts the same options as the context constructor and automatically sets the `parent` option.
 
+<a name="context-cancel"/>
+### ctx.cancel()
+
+Cancel request immediately.
+
+This is safe to call multiple times.
+
 <a name="context-deadline"/>
 ### ctx.deadline
 
-Number of milliseconds since Unix epoch.
+Time in milliseconds since Unix epoch when the request will be canceled if not done.
+
+<a name="context-done"/>
+### ctx.done()
+
+Mark the request as done.
+
+This should always be called when the request is finished and is safe to call multiple times.
 
 ## License
 

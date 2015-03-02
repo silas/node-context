@@ -1,7 +1,7 @@
 {
   "name": "node-context",
-  "version": "0.2.0",
-  "description": "Context type that carries deadlines and cancelation signals.",
+  "version": "0.3.0",
+  "description": "Context type that carries deadlines, cancelation signals, and other request-scoped values.",
   "main": "lib",
   "devDependencies": {
     "istanbul": "^0.3.5",
