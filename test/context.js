@@ -27,7 +27,8 @@ describe('Context', function() {
     it('should work', function() {
       var ctx = new context.Context();
 
-      ctx.should.not.have.property('_done');
+      ctx.should.have.property('finished', false);
+      ctx.should.have.property('canceled', false);
       ctx.should.not.have.property('_timeoutId');
     });
 
@@ -61,10 +62,14 @@ describe('Context', function() {
       var parent = context();
       parent.ok = true;
       parent._fail = true;
+      parent.canceled = true;
+      parent.finished = true;
       var child = parent.create();
 
       child.should.have.property('ok', true);
       child.should.not.have.property('_fail');
+      child.should.have.property('canceled', false);
+      child.should.have.property('finished', false);
     });
 
     it('should use parent deadline if not defined', function() {
@@ -103,30 +108,31 @@ describe('Context', function() {
       var ctx = context();
 
       ctx.once('cancel', function() {
-        ctx.should.have.property('_cancel', true);
+        ctx.should.have.property('canceled', true);
+        ctx.should.have.property('finished', false);
 
         done();
       });
       ctx.cancel();
     });
 
-    it('should emit done when called', function(done) {
+    it('should emit finish when called', function(done) {
       var ctx = context();
 
-      ctx.once('done', function() {
-        ctx.should.have.property('_cancel', true);
-        ctx.should.have.property('_done', true);
+      ctx.once('finish', function() {
+        ctx.should.have.property('canceled', true);
+        ctx.should.have.property('finished', true);
 
         done();
       });
       ctx.cancel();
     });
 
-    it('should not allow cancel to be called multiple times', function(done) {
+    it('should not allow multiple calls', function(done) {
       var ctx = context();
 
       ctx.once('cancel', function() {
-        ctx.should.have.property('_cancel', true);
+        ctx.should.have.property('canceled', true);
 
         ctx.cancel().should.be.false;
 
@@ -149,17 +155,17 @@ describe('Context', function() {
       try {
         ctx.should.have.property('deadline', 1000);
 
-        ctx.should.not.have.property('_cancel');
+        ctx.should.have.property('canceled', false);
         spy.should.have.property('called', false);
 
         clock.tick(500);
 
-        ctx.should.not.have.property('_cancel');
+        ctx.should.have.property('canceled', false);
         spy.should.have.property('called', false);
 
         clock.tick(500);
 
-        ctx.should.have.property('_cancel', true);
+        ctx.should.have.property('canceled', true);
         spy.should.have.property('called', true);
 
         clock.restore();
@@ -186,30 +192,31 @@ describe('Context', function() {
     });
   });
 
-  describe('done', function() {
-    it('should emit done when called', function(done) {
+  describe('end', function() {
+    it('should emit finish when called', function(done) {
       var ctx = context();
 
-      ctx.once('done', function() {
-        ctx.should.not.have.property('_cancel');
-        ctx.should.have.property('_done', true);
+      ctx.once('finish', function() {
+        ctx.should.have.property('canceled', false);
+        ctx.should.have.property('finished', true);
 
         done();
       });
-      ctx.done();
+      ctx.end();
     });
 
-    it('should not allow done to be called multiple times', function(done) {
+    it('should not allow multiple calls', function(done) {
       var ctx = context();
 
-      ctx.once('done', function() {
-        ctx.should.have.property('_done', true);
+      ctx.once('finish', function() {
+        ctx.should.have.property('canceled', false);
+        ctx.should.have.property('finished', true);
 
-        ctx.done().should.be.false;
+        ctx.end().should.be.false;
 
         done();
       });
-      ctx.done().should.be.true;
+      ctx.end().should.be.true;
     });
   });
 });

@@ -4,47 +4,9 @@ Context type that carries deadlines, cancelation signals, and other request-scop
 
 Influenced by Go's [context](https://golang.org/x/net/context).
 
-## Usage
-
-``` javascript
-var context = require('node-context');
-
-function display(ctx, name) {
-  ctx.once('cancel', function() {
-    console.log('%s cancel %d (deadline %d)', name, new Date() - ctx.time, ctx.deadline);
-  });
-
-  ctx.once('done', function() {
-    console.log('%s done', name);
-  });
-}
-
-var main = context();
-main.time = new Date();
-
-var master = main.create({ timeout: 1000 });
-
-display(main, 'main');
-display(master, 'master');
-display(master.create({ timeout: 500 }), 'worker1');
-display(master.create(), 'worker2');
-
-process.on('beforeExit', function() {
-  main.done();
-});
-```
-
-Output
-
-```
-worker1 cancel 532 (deadline 1425278555679)
-worker1 done
-master cancel 1009 (deadline 1425278556175)
-worker2 cancel 1010 (deadline 1425278556175)
-worker2 done
-master done
-main done
-```
+ * [Documentation](#documentation)
+ * [Example](#example)
+ * [License](#license)
 
 ## Documentation
 
@@ -67,9 +29,9 @@ Emitted when the request exceeds it's deadline or is canceled.
 This is only emitted once.
 
 <a name="context-event-done"/>
-### Event: 'done'
+### Event: 'finish'
 
-Emitted when the request is done.
+Emitted when the request is finished.
 
 This is only emitted once.
 
@@ -87,17 +49,69 @@ Cancel request immediately.
 
 This is safe to call multiple times.
 
+<a name="context-canceled"/>
+### ctx.canceled
+
+True after canceled.
+
 <a name="context-deadline"/>
 ### ctx.deadline
 
-Time in milliseconds since Unix epoch when the request will be canceled if not done.
+Time in milliseconds when the request will be canceled if not finished.
 
-<a name="context-done"/>
-### ctx.done()
+<a name="context-end"/>
+### ctx.end()
 
-Mark the request as done.
+Finish the request, this must be called at the end of the request.
 
-This should always be called when the request is finished and is safe to call multiple times.
+It is safe to call multiple times.
+
+<a name="context-finished"/>
+### ctx.finished
+
+True after finished.
+
+## Example
+
+``` javascript
+var context = require('node-context');
+
+function display(ctx, name) {
+  ctx.once('cancel', function() {
+    console.log('%s canceled after %d ms', name, new Date() - ctx.time);
+  });
+
+  ctx.once('finish', function() {
+    console.log('%s finished', name);
+  });
+}
+
+var parent = context();
+parent.time = new Date();
+
+var master = parent.create({ timeout: 1000 });
+
+display(parent, 'parent');
+display(master, 'master');
+display(master.create({ timeout: 500 }), 'worker1');
+display(master.create(), 'worker2');
+
+process.on('beforeExit', function() {
+  parent.end();
+});
+```
+
+Output
+
+```
+worker1 canceled after 524 ms
+worker1 finished
+master canceled after 1007 ms
+worker2 canceled after 1007 ms
+worker2 finished
+master finished
+parent finished
+```
 
 ## License
 
