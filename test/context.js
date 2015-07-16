@@ -107,13 +107,14 @@ describe('Context', function() {
     it('should emit cancel when called', function(done) {
       var ctx = context();
 
-      ctx.once('cancel', function() {
+      ctx.once('cancel', function(reason) {
         ctx.should.have.property('canceled', true);
         ctx.should.have.property('finished', false);
+        reason.should.equal('test');
 
         done();
       });
-      ctx.cancel();
+      ctx.cancel('test');
     });
 
     it('should emit finish when called', function(done) {
@@ -167,6 +168,7 @@ describe('Context', function() {
 
         ctx.should.have.property('canceled', true);
         spy.should.have.property('called', true);
+        spy.args[0][0].should.equal('timeout');
 
         clock.restore();
       } catch (err) {
