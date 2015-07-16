@@ -221,4 +221,39 @@ describe('Context', function() {
       ctx.end().should.be.true;
     });
   });
+
+  describe('values', function() {
+    it('should work', function() {
+      var ctx = context();
+      ctx.values().should.eql({});
+
+      ctx.hello = 'world';
+
+      ctx.values().should.eql({ hello: 'world' });
+
+      ctx._one = 'one';
+      ctx.__two = 'two';
+      if (!ctx.domain) ctx.domain = {};
+      ctx.bonjour = 'monde';
+
+      ctx.values().should.eql({
+        hello: 'world',
+        bonjour: 'monde',
+      });
+    });
+
+    it('should merge values', function() {
+      var ctx = context();
+      ctx.hello = 'world';
+
+      var obj = { bonjour: 'monde' };
+
+      ctx.values(obj);
+
+      obj.should.eql({
+        hello: 'world',
+        bonjour: 'monde',
+      });
+    });
+  });
 });

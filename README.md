@@ -71,6 +71,13 @@ It is safe to call multiple times.
 
 True after finished.
 
+<a name="context-values"/>
+### ctx.values([object])
+
+Return context values.
+
+If `object` is provided then the context values will be merged into it.
+
 ## Example
 
 ``` javascript
