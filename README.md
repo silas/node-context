@@ -42,6 +42,11 @@ Create and return a child context.
 
 This accepts the same options as the context constructor and automatically sets the `parent` option.
 
+Options
+
+ * cancel (Boolean, default: `true`): inherit cancel/finish signals and deadline/timeout
+ * values (Boolean, default: `true`): inherit values (shallow copy)
+
 <a name="context-cancel"/>
 ### ctx.cancel()
 

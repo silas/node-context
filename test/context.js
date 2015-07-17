@@ -62,17 +62,21 @@ describe('Context', function() {
       var parent = context();
       parent.ok = true;
       parent._fail = true;
-      parent.canceled = true;
-      parent.finished = true;
       var child = parent.create();
 
       child.should.have.property('ok', true);
       child.should.not.have.property('_fail');
-      child.should.have.property('canceled', false);
-      child.should.have.property('finished', false);
     });
 
-    it('should use parent deadline if not defined', function() {
+    it('should not copy parent properties', function() {
+      var parent = context();
+      parent.ok = true;
+      var child = parent.create({ values: false });
+
+      child.should.not.have.property('ok');
+    });
+
+    it('should use parent deadline', function() {
       this.sinon.spy(context.Context.prototype, '_timeout');
 
       var deadline = 1000;
@@ -80,26 +84,86 @@ describe('Context', function() {
       var child = parent.create();
 
       child.should.have.property('deadline', deadline);
+    });
+
+    it('should not use parent deadline', function() {
+      this.sinon.spy(context.Context.prototype, '_timeout');
+
+      var deadline = 1000;
+      var parent = context({ deadline: deadline });
+      var child = parent.create({ cancel: false });
+
+      child.should.not.have.property('deadline');
+    });
+
+    it('should not use parent deadline', function() {
+      this.sinon.spy(context.Context.prototype, '_timeout');
+
+      var parent = context({ deadline: 1000 });
+      var child = parent.create({ cancel: false, deadline: 2000 });
+
+      child.should.have.property('deadline', 2000);
     });
 
     it('should use parent deadline if less', function() {
       this.sinon.spy(context.Context.prototype, '_timeout');
 
-      var deadline = 1000;
-      var parent = context({ deadline: deadline });
+      var parent = context({ deadline: 1000 });
+      var child = parent.create({ deadline: 2000 });
+
+      child.should.have.property('deadline', 1000);
+    });
+
+    it('should use child deadline @test', function() {
+      this.sinon.spy(context.Context.prototype, '_timeout');
+
+      var parent = context();
       var child = parent.create({ deadline: 1000 });
 
-      child.should.have.property('deadline', deadline);
+      child.should.have.property('deadline', 1000);
     });
 
     it('should use child deadline if less', function() {
       this.sinon.spy(context.Context.prototype, '_timeout');
 
-      var deadline = 1000;
       var parent = context({ deadline: 2000 });
       var child = parent.create({ deadline: 1000 });
 
-      child.should.have.property('deadline', deadline);
+      child.should.have.property('deadline', 1000);
+    });
+
+    it('should inherit canceled state', function(done) {
+      this.sinon.spy(context.Context.prototype, '_timeout');
+
+      var parent = context({ timeout: 2000 });
+      parent.canceled = true;
+
+      var child = parent.create({ timeout: 100 });
+
+      child.once('cancel', function(reason) {
+        reason.should.equal('dead');
+
+        child.should.have.property('canceled', true);
+
+        process.nextTick(function() {
+          child.should.have.property('finished', true);
+
+          done();
+        });
+      });
+    });
+
+    it('should inherit finished state', function(done) {
+      var parent = context();
+      parent.finished = true;
+
+      var child = parent.create();
+
+      child.once('finish', function() {
+        child.should.have.property('finished', true);
+
+        done();
+      });
     });
   });
 
